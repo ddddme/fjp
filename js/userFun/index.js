@@ -149,6 +149,8 @@ $(function () {
                         $.toast("查询车票失败！");
                         return;
                     }
+                    $("#pageTickList [id=pp1]").empty();
+                    $("#pageTickList [id=pp1]").append("<div class=\"weui_panel_hd\" id=\"listHead\">文字组合列表</div>");
                     $("#pageTickList [id=listHead]").html("<span style='font-size:16px;'>武汉-" +
                         $("#pageIndex [id=ddz]").val() + "&nbsp;" + $("#pageIndex [id=ftime]").val()+"</span>");
                     addTickList(JSON.parse(rvJson.value));
