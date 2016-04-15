@@ -2,55 +2,58 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-
-/// <summary>
-/// FindTickets 的摘要说明
-/// </summary>
-public class FindCheCis : TicketsBase
+namespace mySocketClient
 {
-    private string _startDateTime;
-    private string _endDateTime;
-    private string _destination;
-    public FindCheCis() : base()
+    /// <summary>
+    /// FindTickets 的摘要说明
+    /// </summary>
+    public class FindCheCis : TicketsBase
     {
-       
-    }
-    public FindCheCis(SocketTestClient cilent, string sessionID, string startDateTime, string endDateTime, string destination) :base(cilent, sessionID)
-    {
-        _startDateTime = startDateTime;
-        _endDateTime = endDateTime;
-        _destination = destination;
-    }
-
-    public List<CheCi> findCheCi() {
-        var cheCis = new List<CheCi>();
-        var actionCode = "";
-
-        if (string.IsNullOrEmpty(_startDateTime)|| string.IsNullOrEmpty(_endDateTime) || string.IsNullOrEmpty(_sessionID)) {
-            return null;
-        }
-        var request000 = "JUNLYFUNC_000?" + _StationID + "`" + _destination + "`" + _startDateTime + "`" + _endDateTime + "`" + _sessionID + "`" + _ProxyID + "junly";
-        bool isConnected = _Client.Connect();
-        if (!isConnected)
+        private string _startDateTime;
+        private string _endDateTime;
+        private string _destination;
+        public FindCheCis() : base()
         {
-            return null;
-        }
-        _Client.SendMessage(request000);
-        var response000 = _Client.ReceiveMessage();
 
-        var response000Parts = response000.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-        if (response000Parts.Count() < 5)
+        }
+        public FindCheCis(SocketClient cilent, string sessionID, string startDateTime, string endDateTime, string destination) : base(cilent, sessionID)
         {
-            return null;
+            _startDateTime = startDateTime;
+            _endDateTime = endDateTime;
+            _destination = destination;
         }
 
-        for (int i = 4; i < response000Parts.Length; i++)
+        public List<CheCi> findCheCi()
         {
-            var result000Parts = response000Parts[i].Split('`');
-            if (result000Parts.Length == 13)
+            var cheCis = new List<CheCi>();
+            var actionCode = "";
+
+            if (string.IsNullOrEmpty(_startDateTime) || string.IsNullOrEmpty(_endDateTime) || string.IsNullOrEmpty(_sessionID))
             {
-                actionCode = response000Parts[i].Split('`')[12];
+                return null;
             }
+            var request000 = "JUNLYFUNC_000?" + _StationID + "`" + _destination + "`" + _startDateTime + "`" + _endDateTime + "`" + _sessionID + "`" + _ProxyID + "junly";
+            bool isConnected = _Client.Connect();
+            if (!isConnected)
+            {
+                return null;
+            }
+            _Client.SendMessage(request000);
+            var response000 = _Client.ReceiveMessage();
+
+            var response000Parts = response000.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            if (response000Parts.Count() < 5)
+            {
+                return null;
+            }
+
+            for (int i = 4; i < response000Parts.Length; i++)
+            {
+                var result000Parts = response000Parts[i].Split('`');
+                if (result000Parts.Length == 13)
+                {
+                    actionCode = response000Parts[i].Split('`')[12];
+                }
 
                 var fcDate = response000Parts[i].Split('`')[0];
                 var fcTime = response000Parts[i].Split('`')[1];
@@ -68,11 +71,12 @@ public class FindCheCis : TicketsBase
                 var cheCi = new CheCi(fcDate, fcTime, checi, destination, chexing, licheng, yupiao, price, seat, runline, memorial, code, actionCode);
 
                 cheCis.Add(cheCi);
-            
 
+
+            }
+
+            return cheCis;
         }
 
-        return cheCis;
     }
-
 }

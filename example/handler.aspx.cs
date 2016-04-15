@@ -5,6 +5,7 @@ using System.Net;
 using App.FunctionLibrary;
 using yangNetCl;
 using System.Threading;
+using mySocketClient;
 
 public partial class example_handler : System.Web.UI.Page
 {
@@ -44,9 +45,7 @@ public partial class example_handler : System.Web.UI.Page
     {
         try
         {
-            SocketTestClient cilent = new SocketTestClient();
-            GetStation getStation = new GetStation(cilent);
-            List<Station> stations = getStation.getStation();
+            List<FjpTick.Station.StationOut> stations = FjpTick.Station.getStation();
             if (stations == null)
             {
                 Response.Write(new { success = false, msg = "查询站点失败" }.ToJSONString());
@@ -69,7 +68,7 @@ public partial class example_handler : System.Web.UI.Page
         try
         {
             string tGuid = Cl_StrMag.getGuid();
-            FindCheCis findTicket = new FindCheCis(new SocketTestClient(), tGuid
+            FindCheCis findTicket = new FindCheCis(new SocketClient(), tGuid
                 , DateTime.Now.ToString("yyyy.MM.dd"), DateTime.Now.ToString("yyyy.MM.dd"), Request["ddz"]);
             List<CheCi> cheCis = findTicket.findCheCi();
             if (cheCis == null)

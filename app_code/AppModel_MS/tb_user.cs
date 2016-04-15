@@ -24,7 +24,7 @@ namespace d_fjp
         /// </summary>		
         public int tb_user_ID
         {
-            get{ return _tb_user_id; }
+            get { return _tb_user_id; }
             set{ _tb_user_id = value; }
         }        
 		/// <summary>
@@ -87,7 +87,7 @@ namespace d_fjp
 
             DataTable dt = _D.getDb(strSql.ToString(),pMt:mt);
             if (dt.Rows.Count> 0)
-            {
+            {               
                 tb_user model = new tb_user();
 		      	if(dt.Rows[0]["tb_user_ID"] != null&&dt.Rows[0]["tb_user_ID"].ToString()!="")model.tb_user_ID=Convert.ToInt32(dt.Rows[0]["tb_user_ID"].ToString());		      	
 		      	if(dt.Rows[0]["tb_user_wxbs"] != null&&dt.Rows[0]["tb_user_wxbs"].ToString()!="")model.tb_user_wxbs=dt.Rows[0]["tb_user_wxbs"].ToString();		      	

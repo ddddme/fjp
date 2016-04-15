@@ -3,88 +3,91 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-/// <summary>
-///车站信息
-/// </summary>
-public class Station
+namespace mySocketClient
 {
-    private string _stationname;
-    private string _zjm;//助记码
-    private string _distance;
-    private string _qym;//区域码
-
-    public Station(string stationname, string zjm, string distance, string qym)
-    {
-        this._stationname = stationname;
-        this._zjm = zjm;
-        this._distance = distance;
-        this._qym = qym;
-    }
-    public string toString()
-    {
-        return _stationname + "," + _zjm + "," + _distance + "," + _qym;
-    }
-    public Station()
-    {
-        //
-        // TODO: 在此处添加构造函数逻辑
-        //
-    }
     /// <summary>
-    /// 站名
+    ///车站信息
     /// </summary>
-    public string Stationname
+    public class Station
     {
-        get
-        {
-            return _stationname;
-        }
+        private string _stationname;
+        private string _zjm;//助记码
+        private string _distance;
+        private string _qym;//区域码
 
-        set
+        public Station(string stationname, string zjm, string distance, string qym)
         {
-            _stationname = value;
+            this._stationname = stationname;
+            this._zjm = zjm;
+            this._distance = distance;
+            this._qym = qym;
         }
-    }
-    /// <summary>
-    /// 助记码
-    /// </summary>
-    public string Zjm
-    {
-        get
+        public string toString()
         {
-            return _zjm;
+            return _stationname + "," + _zjm + "," + _distance + "," + _qym;
         }
+        public Station()
+        {
+            //
+            // TODO: 在此处添加构造函数逻辑
+            //
+        }
+        /// <summary>
+        /// 站名
+        /// </summary>
+        public string Stationname
+        {
+            get
+            {
+                return _stationname;
+            }
 
-        set
-        {
-            _zjm = value;
+            set
+            {
+                _stationname = value;
+            }
         }
-    }
-    public string Distance
-    {
-        get
+        /// <summary>
+        /// 助记码
+        /// </summary>
+        public string Zjm
         {
-            return _distance;
-        }
+            get
+            {
+                return _zjm;
+            }
 
-        set
-        {
-            _distance = value;
+            set
+            {
+                _zjm = value;
+            }
         }
-    }
-    /// <summary>
-    /// 区域码
-    /// </summary>
-    public string Qym
-    {
-        get
+        public string Distance
         {
-            return _qym;
-        }
+            get
+            {
+                return _distance;
+            }
 
-        set
+            set
+            {
+                _distance = value;
+            }
+        }
+        /// <summary>
+        /// 区域码
+        /// </summary>
+        public string Qym
         {
-            _qym = value;
+            get
+            {
+                return _qym;
+            }
+
+            set
+            {
+                _qym = value;
+            }
         }
     }
 }

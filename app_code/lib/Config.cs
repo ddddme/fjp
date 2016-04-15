@@ -18,7 +18,7 @@ namespace FlowRecharge.Wechat
         public static readonly string MCHID = Configer.Find("Wechat", "MCHID").Value;
         public static readonly string KEY = Configer.Find("Wechat", "KEY").Value;
         public static readonly string APPSECRET = Configer.Find("Wechat", "APPSECRET").Value;
-
+        
         //=======【证书路径设置】===================================== 
         /* 证书路径,注意应该填写绝对路径（仅退款、撤销订单时需要）
         */

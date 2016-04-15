@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Web.UI;
 using App.FunctionLibrary;
-using FlowRecharge.Wechat.business;
 using System.Data;
 using yangNetCl;
 using _D = yangNetCl.Cl_DataMag;
-using _S = yangNetCl.Cl_StrMag;
-using Framework.Entity;
 using System.Collections.Generic;
+using mySocketClient;
 
 namespace FlowRecharge.Wechat
 {
@@ -19,7 +17,6 @@ namespace FlowRecharge.Wechat
     {
         static readonly object locker = new object();
         public ResultNotify(Page page) : base(page) { }
-
         private enum en_OrderStatus
         {
             未检查,
@@ -157,20 +154,23 @@ namespace FlowRecharge.Wechat
                 {
                     #region 调用购票接口,同时更新支付状态
                     string sql = @" select * 
-                                    from tb_order 
+                                    from tb_order as a left join  
                                     where tb_order_BatchID='" + pbOrderID + "' and tb_order_TransID='" + transaction_id + "'";
-                    Log.WriteLog("根据预支付订单和微信订单获取订单：" + sql);
-                    DataTable dt = sql.YanGetDb();
+                    Log.WriteLog("根据预商户订单和微信订单获取订单：" + sql);
+                    DataTable dt = sql.YanGetDb();                    
                     if (dt.Rows.Count != 1)
                     {
-                        throw new Exception("预支付订单号 {0} 未发现,或有多重订单！".Formatting(pbOrderID));
+                        throw new Exception("商户订单号 {0} 未发现,或有多重订单！".Formatting(pbOrderID));
                     }
-                    //string orderId = FlowRechargeService.SubmitRecharge(dt.YanDtValue2("tb_order_MerchandiseID").CStr(), dt.YanDtValue2("tb_order_phone").CStr());
+                    //锁票                  
+                    //LockTicket lockTicket = new LockTicket(new SocketClient(), pbOrderID, dt.YanDtValue2("tb_order_cc"), 1, "", "", "");
+                    //mySocketClient. LockTicket lockTicket = new LockTicket();
                     string orderId = "";
                     isSubmitRecharge = true;
                     sql = @"update  tb_order 
                                 set tb_order_BatchID='" + orderId + @"',
-                                    tb_order_Status='支付成功,订票成功'
+                                    tb_order_Status='支付成功',
+                                    tb_order_payStatus='支付成功',
                             where tb_order_ID='" + dt.YanDtValue2("tb_order_ID") + "'";
                     Log.WriteLog("提交充值成功更新状态：" + sql);
                     sql.YanDbExe();
@@ -201,7 +201,6 @@ namespace FlowRecharge.Wechat
                         string sql = "update tb_order set tb_order_Status='提交充值成功' where tb_order_pbOrderID='" + pbOrderID + "' and tb_order_TransID='" + transaction_id + "'";
                         Log.WriteLog("支付成功，提交充值成功，后续发生错误：" + sql);
                         sql.YanDbExe();
-
                     }
                     #endregion
                 }
