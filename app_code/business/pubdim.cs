@@ -44,7 +44,7 @@ namespace FlowRecharge.Wechat
             WxPayData result = WxPayApi.UnifiedOrder(data);
             if (!result.IsSet("appid") || !result.IsSet("prepay_id") || result.GetValue("prepay_id").ToString() == "")
             {
-                throw new WxPayException("下订单出错！" + dic["phone"]);
+                throw new WxPayException("下订单出错！");
             }
             return result;
         }

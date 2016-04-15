@@ -15,27 +15,28 @@ namespace d_fjp
       	private int _tb_order_id;
 		private string _tb_order_transid="";
 		private string _tb_order_wxbs="";
-		private string _tb_order_batchid="";
+		private string _tb_order_batchid;
 		private string _tb_order_wechattransid="";
 		private decimal? _tb_order_amount=0;
 		private DateTime? _tb_order_createdate=DateTime.Now;
 		private DateTime? _tb_order_paydate=DateTime.Now;
-		private string _tb_order_status="业务创建";
+		private string _tb_order_status="待支付";
 		private string _tb_order_refundid="";
 		private DateTime? _tb_order_refundtime=DateTime.Now;
 		private string _tb_order_refundstatus="";
 		private string _tb_order_tcjg="";
 		private string _tb_order_pborderid="";
 		private string _tb_order_prepayid="";
-		private string _tb_order_cc="";
+		private string _tb_order_cc;
 		private DateTime? _tb_order_fcsj=DateTime.Now;
-		private string _tb_order_ddz="";
+		private string _tb_order_ddz;
 		private string _tb_order_cx="";
 		private int _tb_order_lc=0;
 		private decimal? _tb_order_pj=0;
 		private decimal? _tb_order_fjf=0;
 		private string _tb_order_jpk="";
 		private string _tb_order_zwh="";
+		private string _tb_order_paystatus="待支付";
 		      	/// <summary>
 		/// 主键
         /// </summary>		
@@ -228,13 +229,21 @@ namespace d_fjp
             get{ return _tb_order_zwh; }
             set{ _tb_order_zwh = value; }
         }        
+		/// <summary>
+		/// 支付状态
+        /// </summary>		
+        public string tb_order_payStatus
+        {
+            get{ return _tb_order_paystatus; }
+            set{ _tb_order_paystatus = value; }
+        }        
 		        /// <summary>
         /// 通过GID返回实体对象
         /// </summary>
         public static tb_order getNewModel(int pId, _D.myTransaction mt = null)
         {
             StringBuilder strSql = new StringBuilder();
-			strSql.Append("select tb_order_ID, tb_order_TransID, tb_order_wxbs, tb_order_BatchID, tb_order_WechatTransID, tb_order_Amount, tb_order_CreateDate, tb_order_PayDate, tb_order_Status, tb_order_refundid, tb_order_refundTime, tb_order_refundstatus, tb_order_tcjg, tb_order_pbOrderID, tb_order_prepayID, tb_order_cc, tb_order_fcsj, tb_order_ddz, tb_order_cx, tb_order_lc, tb_order_pj, tb_order_fjf, tb_order_jpk, tb_order_zwh  ");			
+			strSql.Append("select tb_order_ID, tb_order_TransID, tb_order_wxbs, tb_order_BatchID, tb_order_WechatTransID, tb_order_Amount, tb_order_CreateDate, tb_order_PayDate, tb_order_Status, tb_order_refundid, tb_order_refundTime, tb_order_refundstatus, tb_order_tcjg, tb_order_pbOrderID, tb_order_prepayID, tb_order_cc, tb_order_fcsj, tb_order_ddz, tb_order_cx, tb_order_lc, tb_order_pj, tb_order_fjf, tb_order_jpk, tb_order_zwh, tb_order_payStatus  ");			
 			strSql.Append("  from tb_order ");
             strSql.Append(" where tb_order_ID='"+pId+"'");
 
@@ -266,6 +275,7 @@ namespace d_fjp
 		      	if(dt.Rows[0]["tb_order_fjf"] != null&&dt.Rows[0]["tb_order_fjf"].ToString()!="")model.tb_order_fjf=Convert.ToDecimal(dt.Rows[0]["tb_order_fjf"].ToString());		      	
 		      	if(dt.Rows[0]["tb_order_jpk"] != null&&dt.Rows[0]["tb_order_jpk"].ToString()!="")model.tb_order_jpk=dt.Rows[0]["tb_order_jpk"].ToString();		      	
 		      	if(dt.Rows[0]["tb_order_zwh"] != null&&dt.Rows[0]["tb_order_zwh"].ToString()!="")model.tb_order_zwh=dt.Rows[0]["tb_order_zwh"].ToString();		      	
+		      	if(dt.Rows[0]["tb_order_payStatus"] != null&&dt.Rows[0]["tb_order_payStatus"].ToString()!="")model.tb_order_payStatus=dt.Rows[0]["tb_order_payStatus"].ToString();		      	
 		      	return model;                
             }
             else
@@ -279,9 +289,9 @@ namespace d_fjp
         public void add(_D.myTransaction mt = null){
             StringBuilder strSql = new StringBuilder();
 			strSql.Append("insert into tb_order(");			
-            strSql.Append("tb_order_TransID,tb_order_wxbs,tb_order_BatchID,tb_order_WechatTransID,tb_order_Amount,tb_order_CreateDate,tb_order_PayDate,tb_order_Status,tb_order_refundid,tb_order_refundTime,tb_order_refundstatus,tb_order_tcjg,tb_order_pbOrderID,tb_order_prepayID,tb_order_cc,tb_order_fcsj,tb_order_ddz,tb_order_cx,tb_order_lc,tb_order_pj,tb_order_fjf,tb_order_jpk,tb_order_zwh");
+            strSql.Append("tb_order_TransID,tb_order_wxbs,tb_order_BatchID,tb_order_WechatTransID,tb_order_Amount,tb_order_CreateDate,tb_order_PayDate,tb_order_Status,tb_order_refundid,tb_order_refundTime,tb_order_refundstatus,tb_order_tcjg,tb_order_pbOrderID,tb_order_prepayID,tb_order_cc,tb_order_fcsj,tb_order_ddz,tb_order_cx,tb_order_lc,tb_order_pj,tb_order_fjf,tb_order_jpk,tb_order_zwh,tb_order_payStatus");
 			strSql.Append(") values (");
-            strSql.Append("@tb_order_TransID,@tb_order_wxbs,@tb_order_BatchID,@tb_order_WechatTransID,@tb_order_Amount,@tb_order_CreateDate,@tb_order_PayDate,@tb_order_Status,@tb_order_refundid,@tb_order_refundTime,@tb_order_refundstatus,@tb_order_tcjg,@tb_order_pbOrderID,@tb_order_prepayID,@tb_order_cc,@tb_order_fcsj,@tb_order_ddz,@tb_order_cx,@tb_order_lc,@tb_order_pj,@tb_order_fjf,@tb_order_jpk,@tb_order_zwh");            
+            strSql.Append("@tb_order_TransID,@tb_order_wxbs,@tb_order_BatchID,@tb_order_WechatTransID,@tb_order_Amount,@tb_order_CreateDate,@tb_order_PayDate,@tb_order_Status,@tb_order_refundid,@tb_order_refundTime,@tb_order_refundstatus,@tb_order_tcjg,@tb_order_pbOrderID,@tb_order_prepayID,@tb_order_cc,@tb_order_fcsj,@tb_order_ddz,@tb_order_cx,@tb_order_lc,@tb_order_pj,@tb_order_fjf,@tb_order_jpk,@tb_order_zwh,@tb_order_payStatus");            
             strSql.Append(") ");       
 			SqlParameter[] parameters = {
 			            new SqlParameter("@tb_order_TransID", SqlDbType.VarChar,8000) ,            
@@ -306,7 +316,8 @@ namespace d_fjp
                         new SqlParameter("@tb_order_pj", SqlDbType.Money) ,            
                         new SqlParameter("@tb_order_fjf", SqlDbType.Money) ,            
                         new SqlParameter("@tb_order_jpk", SqlDbType.VarChar,8000) ,            
-                        new SqlParameter("@tb_order_zwh", SqlDbType.VarChar,8000)             
+                        new SqlParameter("@tb_order_zwh", SqlDbType.VarChar,8000) ,            
+                        new SqlParameter("@tb_order_payStatus", SqlDbType.VarChar,8000)             
               
             };
                         
@@ -332,7 +343,8 @@ namespace d_fjp
             parameters[19].Value =this.tb_order_pj;                        
             parameters[20].Value =this.tb_order_fjf;                        
             parameters[21].Value =this.tb_order_jpk;                        
-            parameters[22].Value =this.tb_order_zwh;            
+            parameters[22].Value =this.tb_order_zwh;                        
+            parameters[23].Value =this.tb_order_payStatus;            
 
             tb_order_ID=_D.dbExe(strSql.ToString(), parameters,pMt:mt);
 		}
@@ -365,7 +377,8 @@ namespace d_fjp
             strSql.Append(" tb_order_pj = @tb_order_pj , ");         
             strSql.Append(" tb_order_fjf = @tb_order_fjf , ");         
             strSql.Append(" tb_order_jpk = @tb_order_jpk , ");         
-            strSql.Append(" tb_order_zwh = @tb_order_zwh  ");            	
+            strSql.Append(" tb_order_zwh = @tb_order_zwh , ");         
+            strSql.Append(" tb_order_payStatus = @tb_order_payStatus  ");            	
             if (strWhere.Trim() == "")
                 strWhere = "where tb_order_ID='" + this.tb_order_ID + "'";
             else
@@ -402,7 +415,8 @@ namespace d_fjp
                         new SqlParameter("@tb_order_pj", SqlDbType.Money) ,            
                         new SqlParameter("@tb_order_fjf", SqlDbType.Money) ,            
                         new SqlParameter("@tb_order_jpk", SqlDbType.VarChar,8000) ,            
-                        new SqlParameter("@tb_order_zwh", SqlDbType.VarChar,8000)             
+                        new SqlParameter("@tb_order_zwh", SqlDbType.VarChar,8000) ,            
+                        new SqlParameter("@tb_order_payStatus", SqlDbType.VarChar,8000)             
               
             };
                         
@@ -429,7 +443,8 @@ namespace d_fjp
             parameters[20].Value =this.tb_order_pj;                        
             parameters[21].Value =this.tb_order_fjf;                        
             parameters[22].Value =this.tb_order_jpk;                        
-            parameters[23].Value =this.tb_order_zwh;            
+            parameters[23].Value =this.tb_order_zwh;                        
+            parameters[24].Value =this.tb_order_payStatus;            
 
             int rows = _D.dbExe(strSql.ToString(), parameters,pMt:mt);
             if (rows > 0)
@@ -467,7 +482,7 @@ namespace d_fjp
         {
             StringBuilder strSql = new StringBuilder();
             if(string.IsNullOrEmpty(pColumns))
-				strSql.Append("select  tb_order_ID, tb_order_TransID, tb_order_wxbs, tb_order_BatchID, tb_order_WechatTransID, tb_order_Amount, tb_order_CreateDate, tb_order_PayDate, tb_order_Status, tb_order_refundid, tb_order_refundTime, tb_order_refundstatus, tb_order_tcjg, tb_order_pbOrderID, tb_order_prepayID, tb_order_cc, tb_order_fcsj, tb_order_ddz, tb_order_cx, tb_order_lc, tb_order_pj, tb_order_fjf, tb_order_jpk, tb_order_zwh ");			
+				strSql.Append("select  tb_order_ID, tb_order_TransID, tb_order_wxbs, tb_order_BatchID, tb_order_WechatTransID, tb_order_Amount, tb_order_CreateDate, tb_order_PayDate, tb_order_Status, tb_order_refundid, tb_order_refundTime, tb_order_refundstatus, tb_order_tcjg, tb_order_pbOrderID, tb_order_prepayID, tb_order_cc, tb_order_fcsj, tb_order_ddz, tb_order_cx, tb_order_lc, tb_order_pj, tb_order_fjf, tb_order_jpk, tb_order_zwh, tb_order_payStatus ");			
 			else
 				strSql.Append("select " + pColumns);
 			strSql.Append("  from tb_order ");
@@ -531,6 +546,7 @@ namespace d_fjp
 					if(dt.Columns.Contains("tb_order_fjf")){if(dt.Rows[n]["tb_order_fjf"] != null&&dt.Rows[n]["tb_order_fjf"].ToString()!="")model.tb_order_fjf=Convert.ToDecimal(dt.Rows[n]["tb_order_fjf"].ToString());};
 					if(dt.Columns.Contains("tb_order_jpk")){if(dt.Rows[n]["tb_order_jpk"] != null&&dt.Rows[n]["tb_order_jpk"].ToString()!="")model.tb_order_jpk=dt.Rows[n]["tb_order_jpk"].ToString();};
 					if(dt.Columns.Contains("tb_order_zwh")){if(dt.Rows[n]["tb_order_zwh"] != null&&dt.Rows[n]["tb_order_zwh"].ToString()!="")model.tb_order_zwh=dt.Rows[n]["tb_order_zwh"].ToString();};
+					if(dt.Columns.Contains("tb_order_payStatus")){if(dt.Rows[n]["tb_order_payStatus"] != null&&dt.Rows[n]["tb_order_payStatus"].ToString()!="")model.tb_order_payStatus=dt.Rows[n]["tb_order_payStatus"].ToString();};
 										
 				modelList.Add(model);
 				}

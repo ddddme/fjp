@@ -16,8 +16,8 @@
     <script src="../js/userFun/enumPubdim.js"></script>
     <script src="/js/tyFunLk.js"></script>
 
-    <script src="../js/userFun/index.js"></script>
-    <script src="../js/userFun/tickList.js"></script>
+    <script src="../js/userFun/index.js?ver=0.3"></script>
+    <script src="../js/userFun/tickList.js?ver=0.3"></script>
 
     <style type="text/css">
         .ui-loader .ui-icon-loading {
@@ -74,6 +74,7 @@
             </div>
             <a href="javascript:;" class="weui_btn weui_btn_plain_primary" id="search">查询</a>
             <input type="hidden" id="openid" value="<%=ViewState["openid"]%>" />
+            <input type="hidden" id="appid" value="<%=FlowRecharge.Wechat.WxPayConfig.APPID%>" />
         </form>
     </div>
     <%--票列表--%>
@@ -103,5 +104,32 @@
 </body>
 </html>
 
-
+<script type="text/javascript">
+    //微信JSSDK配置
+    try {
+        $.post("handler.aspx?rnd=" + new Date().getTime(),
+            { clFun: en_clFun.获取微信JS配置签名, signUrl: location.href.split('#')[0] },
+            function (data) {
+                try {
+                    var jsonData = JSON.parse(data);
+                    wx.config({
+                        debug: false,
+                        appId: $("#pageIndex [id=appid]").val(),
+                        timestamp: jsonData.timestamp,          //时间戳
+                        nonceStr: jsonData.noncestr,   //随机字符串
+                        signature: jsonData.signature,
+                        jsApiList: [
+                            "checkJsApi",
+                            "chooseImage",
+                            "onMenuShareTimeline",
+                            "closeWindow",
+                            "chooseWXPay"
+                        ]
+                    });
+                } catch (e) {
+                    $.alert("错误:" + e.message);
+                }
+            });
+    } catch (e) { $.toast("错误:" + e.message); }
+</script>
 

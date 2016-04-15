@@ -76,32 +76,7 @@ $(function () {
     $("#pageIndex [id=ftime]").val(new Date().toCommonCase());
     $("#pageIndex [id=ftime]").datetimePicker({ min: new Date().toCommonCase(), value: new Date().toCommonCase(), istime: false });
 
-    //微信JSSDK配置
-    try {
-        $.post("handler.aspx?rnd=" + new Date().getTime(),
-            { clFun: en_clFun.获取微信JS配置签名, signUrl: location.href.split('#')[0] },
-            function (data) {
-                try {
-                    var jsonData = JSON.parse(data);
-                    wx.config({
-                        debug: false,
-                        appId: $("$pageIndex [id=openid]").val(),
-                        timestamp: jsonData.timestamp,          //时间戳
-                        nonceStr: jsonData.noncestr,   //随机字符串
-                        signature: jsonData.signature,
-                        jsApiList: [
-                            "checkJsApi",
-                            "chooseImage",
-                            "onMenuShareTimeline",
-                            "closeWindow",
-                            "chooseWXPay"
-                        ]
-                    });
-                } catch (e) {
-                    $.toast("错误:" + e.message);
-                }
-            });
-    } catch (e) {$.toast("错误:" + e.message);}
+    $.alert("本页面仅供测试使用，如您不是测试人员，请关闭此页面，否则造成的一切财产损失，本站概不负责！","警告"); 
 
     //获取到达站信息
     $.showLoading();
@@ -149,10 +124,16 @@ $(function () {
                         $.toast("查询车票失败！");
                         return;
                     }
+                    //清空列表
                     $("#pageTickList [id=pp1]").empty();
-                    $("#pageTickList [id=pp1]").append("<div class=\"weui_panel_hd\" id=\"listHead\">文字组合列表</div>");
+                    //添加列表HEAD
+                    $("#pageTickList [id=pp1]").append("<div class=\"weui_panel_hd\" id=\"listHead\"></div>");
+                    //添加订单信息
+                    $("#pageTickList [id=listHead]").data("BatchID", rvJson.BatchID)
+                    //修改列表HEAD
                     $("#pageTickList [id=listHead]").html("<span style='font-size:16px;'>武汉-" +
-                        $("#pageIndex [id=ddz]").val() + "&nbsp;" + $("#pageIndex [id=ftime]").val()+"</span>");
+                    $("#pageIndex [id=ddz]").val() + "&nbsp;" + $("#pageIndex [id=ftime]").val() + "</span>");
+                    //添加列表
                     addTickList(JSON.parse(rvJson.value));
                     $("#pageTickList").popup();
                 } catch (e) { $.toast("查询车票失败，"+e.message); }
@@ -160,51 +141,4 @@ $(function () {
         };
     });
 });
-//付款买票
-function callPay() {
-    try {
-        //下订单
-        $("#zhifuSub").removeClass("ui-btn-active");//删除点击标志
-        $("#zhifuSub").addClass("ui-state-disabled");//添加禁用标志
-        $.showLoading();
-        $.post("handler.aspx?rnd=" + new Date().getTime(),
-            { clFun: en_clFun.统一下单, Amount: 0.01, MerchandiseText: "测试商品", MerchandiseSizeMB: 1, MerchandiseID: 1, phone: 1, openid: $("#openid").val() },
-            function (data) {
-                try {
-                    var jsonData = JSON.parse(data);
-                    if (jsonData.type == "1") {
-                        $.alert("订单创建失败！" + jsonData.value, "警告！");
-                        return;
-                    }
-                    var jsonPay = jsonData.value;
-                    wx.chooseWXPay({
-                        timestamp: jsonPay.timeStamp, // 支付签名时间戳，注意微信jssdk中的所有使用timestamp字段均为小写。但最新版的支付后台生成签名使用的timeStamp字段名需大写其中的S字符
-                        nonceStr: jsonPay.nonceStr, // 支付签名随机串，不长于 32 位
-                        package: jsonPay.package, // 统一支付接口返回的prepay_id参数值，提交格式如：prepay_id=***）
-                        signType: 'MD5',
-                        paySign: jsonPay.paySign, // 支付签名
-                        success: function (res) {
-                            $("#tcmc").html($("#MerchandiseText").val());
-                            $("#toPageTwo").click();
-                            $("#zhifuSub").removeClass("ui-state-disabled");//删除禁用标志
-                        },
-                        cancel: function () {
-                            //用户取消
-                            $("#zhifuSub").removeClass("ui-state-disabled");//删除禁用标志
-                        },
-                        fail: function (res) {
-                            $.alert("支付失败:" + JSON.stringify(res), "警告！");
-                            $("#zhifuSub").removeClass("ui-state-disabled");//删除禁用标志
-                        }
-                    });
-                } catch (e) {
-                    $.alert("错误:" + e.message, "警告！");
-                    $("#zhifuSub").removeClass("ui-state-disabled");//删除禁用标志
-                }
-            }).always(function () { $.hideLoading(); });
-    } catch (e) {
-        $.hideLoading();
-        $.alert("错误:" + e.message, "警告！");
-        $("#zhifuSub").removeClass("ui-state-disabled");//删除禁用标志
-    }
-}
+

@@ -72,7 +72,7 @@ namespace FlowRecharge.Wechat
             {
                 lock (locker)
                 {
-                    string sql = "select * from tb_order where tb_order_pbOrderID='" + pbOrderID + "'";
+                    string sql = "select * from tb_order where tb_order_BatchID='" + pbOrderID + "'";
                     Log.WriteLog("根据预支付订单获取订单：" + sql);
                     DataTable dt = sql.YanGetDb();
                     if (dt.Rows.Count != 1)
@@ -155,10 +155,10 @@ namespace FlowRecharge.Wechat
                 bool isSubmitRecharge = false;
                 try
                 {
-                    #region 调用手机充值接口，对手机进行流量套餐充值操作,同时更新支付状态
+                    #region 调用购票接口,同时更新支付状态
                     string sql = @" select * 
                                     from tb_order 
-                                    where tb_order_pbOrderID='" + pbOrderID + "' and tb_order_TransID='" + transaction_id + "'";
+                                    where tb_order_BatchID='" + pbOrderID + "' and tb_order_TransID='" + transaction_id + "'";
                     Log.WriteLog("根据预支付订单和微信订单获取订单：" + sql);
                     DataTable dt = sql.YanGetDb();
                     if (dt.Rows.Count != 1)
@@ -170,7 +170,7 @@ namespace FlowRecharge.Wechat
                     isSubmitRecharge = true;
                     sql = @"update  tb_order 
                                 set tb_order_BatchID='" + orderId + @"',
-                                    tb_order_Status='支付成功,已提交充值'
+                                    tb_order_Status='支付成功,订票成功'
                             where tb_order_ID='" + dt.YanDtValue2("tb_order_ID") + "'";
                     Log.WriteLog("提交充值成功更新状态：" + sql);
                     sql.YanDbExe();

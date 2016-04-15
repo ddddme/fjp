@@ -68,15 +68,16 @@ public partial class example_handler : System.Web.UI.Page
         //Thread.Sleep(3000);
         try
         {
-            FindCheCis findTicket = new FindCheCis(new SocketTestClient(), 
-                Cl_StrMag.getGuid(), DateTime.Now.ToString("yyyy.MM.dd"), DateTime.Now.ToString("yyyy.MM.dd"), Request["ddz"]);
+            string tGuid = Cl_StrMag.getGuid();
+            FindCheCis findTicket = new FindCheCis(new SocketTestClient(), tGuid
+                , DateTime.Now.ToString("yyyy.MM.dd"), DateTime.Now.ToString("yyyy.MM.dd"), Request["ddz"]);
             List<CheCi> cheCis = findTicket.findCheCi();
             if (cheCis == null)
             {
                 Response.Write(new { success = false, msg = "查询失败" }.ToJSONString());
                 return;
             }
-            Response.Write(new { success = true,value= cheCis.ToJSONString() }.ToJSONString());
+            Response.Write(new { success = true, BatchID=tGuid,value = cheCis.ToJSONString() }.ToJSONString());
         }
         catch (Exception ex)
         {
@@ -112,29 +113,28 @@ public partial class example_handler : System.Web.UI.Page
             dic["openid"] = Request["openid"];   //微信客户标识
             dic["total_fee"] = (Convert.ToDecimal(Request["Amount"]) * 100).ToString("0");     //订单金额
             dic["pbOrderID"] = WxPayApi.GenerateOutTradeNo();   //预支付订单号
-            dic["body"] = Request["MerchandiseText"];    //商品描述
-            dic["attach"] = Request["MerchandiseSizeMB"] + "MB";    //商品大小
-            dic["MerchandiseID"] = Request["MerchandiseID"];    //手机号
-            dic["phone"] = Request["phone"];
+            dic["body"] ="武汉-" +Request["Destination"]+" "+ Request["Checi"]+" "+Cl_StrMag.YanForDa_1(Request["FcDate"]) + " " + Request["FcTime"];    //商品描述
+            dic["attach"] = "";    //商品大小
+            dic["out_trade_no"] = Request["BatchID"];    //商户订单号
             orderResult = pubdim.makeOrder(dic);
         }
         catch (WxPayException ex)
         {
             Log.WriteLog("微信支付发生异常:" + ex.Messages());
-            Response.Write("{\"type\":\"1\",\"value\":\"微信支付发生异常，请返回重试！\"}");
+            Response.Write(new { success = false, msg = "微信支付发生异常，请返回重试！" }.ToJSONString());
             return;
         }
         catch (WebException ex)
         {
             Log.WriteLog("网络发生异常:" + ex.Messages());
-            Response.Write("{\"type\":\"1\",\"value\":\"网络发生异常，请返回重试！\"}");
+            Response.Write(new { success = false, msg = "网络发生异常，请返回重试！" }.ToJSONString());
             return;
 
         }
         catch (Exception ex)
         {
             Log.WriteLog("创建预支付订单错误：" + ex.Messages());
-            Response.Write("{\"type\":\"1\",\"value\":\"系统发生未知异常，请返回重试！\r\n" + ex.Message + "\"}");
+            Response.Write(new { success = false, msg = "微信支付发生异常，请返回重试！" }.ToJSONString());
             return;
         }
 
@@ -142,29 +142,33 @@ public partial class example_handler : System.Web.UI.Page
         {
             d_fjp.tb_order order = new d_fjp.tb_order();
             order.tb_order_wxbs = Request["openid"];
-            order.tb_order_TransID = dic["pbOrderID"];                       //预支付订单号
+            order.tb_order_BatchID = Request["BatchID"];                       //商户订单号
             order.tb_order_prepayID = orderResult.GetValue("prepay_id").ToString();    //预支付会话标识
-            order.tb_order_Amount = Request["Amount"].CDec();
+            order.tb_order_Amount = Request["Amount"].CDec();   //订单金额
             order.tb_order_Status = "未支付";  //因为进入页面就会调用统一下单函数，所以每次进入这个页面都会有个订单，给客户列出订单的时候，这部分应该不显示，应该显示后面以后状态的订单
+            order.tb_order_cc = Request["Checi"];
+            order.tb_order_ddz = Request["Destination"];
+            order.tb_order_fcsj =Convert.ToDateTime(Cl_StrMag.YanForDa_2(Request["FcDate"] + " " + Request["FcTime"] + ":00"));
+            order.tb_order_pj =Convert.ToDecimal(Request["Price"]);
             order.add();
         }
         catch (Exception ex)
         {
             Log.WriteLog("保存预支付订单错误：" + ex.Messages());
-            Response.Write("{\"type\":\"1\",\"value\":\"" + ex.Message + "\"}");
+            Response.Write(new { success = false, msg = "微信支付发生异常，请返回重试！" }.ToJSONString());
             return;
         }
         try
         {
             var result = pubdim.GetJsApiParameters(orderResult);
-            Log.WriteLog("下预支付订单正常：" + "{\"type\":\"0\",\"value\":" + result.ToJson() + "}");
-            Response.Write("{\"type\":\"0\",\"value\":" + result.ToJson() + "}");
+            Log.WriteLog("下预支付订单正常：" + new { success = true, value = result.ToJson() }.ToJSONString());
+            Response.Write(new { success = true, value = result.ToJson()}.ToJSONString());
             return;
         }
         catch (Exception ex)
         {
             Log.WriteLog("获取支付参数错误：" + ex.Messages());
-            Response.Write("{\"type\":\"1\",\"value\":\"" + ex.Message + "\"}");
+            Response.Write(new { success = false, msg = "微信支付发生异常，请返回重试！" }.ToJSONString());
         }
     }
 }
