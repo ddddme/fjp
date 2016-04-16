@@ -584,7 +584,7 @@
     var buttonsHtml = buttons.map(function(d, i) {
       return '<a href="javascript:;" class="weui_btn_dialog ' + (d.className || "") + '">' + d.text + '</a>';
     }).join("");
-
+    
     var tpl = '<div class="weui_dialog">' +
                 '<div class="weui_dialog_hd"><strong class="weui_dialog_title">' + params.title + '</strong></div>' +
                 ( params.text ? '<div class="weui_dialog_bd">'+params.text+'</div>' : '')+
@@ -611,7 +611,13 @@
     mask.show();
 
     var dialog = $(tpl).appendTo(document.body);
-    
+      //后加上的
+    var tTop = 0;
+    tTop = $(window).height() / 2;
+    tTop -= $(dialog).height() / 2+50;
+
+    dialog.css("top", tTop+"px");
+
     dialog.show();
     mask.addClass("weui_mask_visible");
     dialog.addClass("weui_dialog_visible");

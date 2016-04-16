@@ -13,18 +13,18 @@ namespace d_fjp
 	public class tb_user
 	{
       	private int _tb_user_id;
-		private string _tb_user_wxbs="";
-		private string _tb_user_sfz="";
+		private string _tb_user_wxbs;
+		private string _tb_user_sfz;
 		private string _tb_user_phone="";
 		private string _tb_user_dz="";
 		private string _tb_user_email="";
-		private string _tb_user_name="";
+		private string _tb_user_name;
 		      	/// <summary>
 		/// 主键
         /// </summary>		
         public int tb_user_ID
         {
-            get { return _tb_user_id; }
+            get{ return _tb_user_id; }
             set{ _tb_user_id = value; }
         }        
 		/// <summary>
@@ -87,7 +87,7 @@ namespace d_fjp
 
             DataTable dt = _D.getDb(strSql.ToString(),pMt:mt);
             if (dt.Rows.Count> 0)
-            {               
+            {
                 tb_user model = new tb_user();
 		      	if(dt.Rows[0]["tb_user_ID"] != null&&dt.Rows[0]["tb_user_ID"].ToString()!="")model.tb_user_ID=Convert.ToInt32(dt.Rows[0]["tb_user_ID"].ToString());		      	
 		      	if(dt.Rows[0]["tb_user_wxbs"] != null&&dt.Rows[0]["tb_user_wxbs"].ToString()!="")model.tb_user_wxbs=dt.Rows[0]["tb_user_wxbs"].ToString();		      	
@@ -168,13 +168,12 @@ namespace d_fjp
               
             };
                         
-            parameters[0].Value =this.tb_user_ID;                        
-            parameters[1].Value =this.tb_user_wxbs;                        
-            parameters[2].Value =this.tb_user_sfz;                        
-            parameters[3].Value =this.tb_user_phone;                        
-            parameters[4].Value =this.tb_user_dz;                        
-            parameters[5].Value =this.tb_user_email;                        
-            parameters[6].Value =this.tb_user_name;            
+            parameters[0].Value =this.tb_user_wxbs;                        
+            parameters[1].Value =this.tb_user_sfz;                        
+            parameters[2].Value =this.tb_user_phone;                        
+            parameters[3].Value =this.tb_user_dz;                        
+            parameters[4].Value =this.tb_user_email;                        
+            parameters[5].Value =this.tb_user_name;            
 
             int rows = _D.dbExe(strSql.ToString(), parameters,pMt:mt);
             if (rows > 0)

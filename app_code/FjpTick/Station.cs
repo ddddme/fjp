@@ -12,12 +12,6 @@ namespace FjpTick
     /// </summary>
     public class Station
     {
-        public Station()
-        {
-            //
-            // TODO: 在此处添加构造函数逻辑
-            //
-        }
         /// <summary>
         /// 获取可售的目标站点
         /// </summary>
@@ -64,32 +58,22 @@ namespace FjpTick
         /// </summary>
         public class StationOut
         {
-            private string _stationname; //站点名称
-            private string _zjm;//助记码
-            private string _distance;  //距离
-            private string _qym;//区域码
-            public StationOut()
-            {
-                //
-                // TODO: 在此处添加构造函数逻辑
-                //
-            }
             /// <summary>
             /// 站点名称
             /// </summary>
-            public string stationname { get { return _stationname; } set { _stationname = value; } }
+            public string stationname;
             /// <summary>
             /// 助记码
             /// </summary>
-            public string zjm { get { return _zjm; } set { _zjm = value; } }
+            public string zjm;
             /// <summary>
             /// 距离
             /// </summary>
-            public string distance { get { return _distance; } set { _distance = value; } }
+            public string distance;
             /// <summary>
             /// 区域码
             /// </summary>
-            public string qym { get { return _qym; } set { _qym = value; } }
+            public string qym;
         }
     }
 

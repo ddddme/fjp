@@ -4,4 +4,6 @@ en_clFun.获取票列表=2;
 en_clFun.获取订单列表=3;
 en_clFun.获取微信JS配置签名=4;
 en_clFun.统一下单=5;
+en_clFun.获取用户信息=6;
+en_clFun.保存用户信息=7;
 

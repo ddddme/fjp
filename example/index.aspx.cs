@@ -1,5 +1,6 @@
 ﻿using System;
 using Framework.Entity;
+using yangNetCl;
 
 public partial class example_index : System.Web.UI.Page
 {
@@ -9,9 +10,10 @@ public partial class example_index : System.Web.UI.Page
         {
             yangNetCl.Cl_fileMag.setEnumJsFile(typeof(FlowRecharge.Wechat.mo_myKz),
               Server.MapPath(@"\") + @"js\userFun\enumPubdim.js");
+            ViewState["openid"] = "oH_LEs92U20dEUn4giqmaoJUjSk4";
         }
-        //if (!IsPostBack && !Configer.IsDebugging)
-        //{
+        if (!IsPostBack && !Configer.IsDebugging)
+        {
             var jsApiPay = new FlowRecharge.Wechat.JsApiPay(this);
             try
             {
@@ -23,6 +25,6 @@ public partial class example_index : System.Web.UI.Page
             {
                 Response.Write("<span style='color:#FF0000;font-size:20px'>" + "页面加载出错，请重试 ...\r\n\r\n" + ex.Message + "</span>");
             }
-        //}
+        }
     }
 }

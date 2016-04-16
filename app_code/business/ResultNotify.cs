@@ -6,6 +6,7 @@ using yangNetCl;
 using _D = yangNetCl.Cl_DataMag;
 using System.Collections.Generic;
 using mySocketClient;
+using d_fjp;
 
 namespace FlowRecharge.Wechat
 {
@@ -46,11 +47,11 @@ namespace FlowRecharge.Wechat
 
             //微信订单号
             var transaction_id = notifyData.GetValue("transaction_id").ToString();
-            //预支付订单号
+            //商户订单号
             var pbOrderID = notifyData.GetValue("out_trade_no").ToString();
             //支付金额
             decimal amountWxback = notifyData.GetValue("total_fee").CDec();
-            Log.WriteLog("支付回调：微信订单号：" + transaction_id + "预支付订单号：" + pbOrderID + "支付金额：" + amountWxback);
+            Log.WriteLog("支付回调：微信订单号：" + transaction_id + "商户订单号：" + pbOrderID + "支付金额：" + amountWxback);
             //判断预支付订单号是否为空
             if (pbOrderID == "")
             {
@@ -70,7 +71,7 @@ namespace FlowRecharge.Wechat
                 lock (locker)
                 {
                     string sql = "select * from tb_order where tb_order_BatchID='" + pbOrderID + "'";
-                    Log.WriteLog("根据预支付订单获取订单：" + sql);
+                    Log.WriteLog("根据商户订单号获取订单：" + sql);
                     DataTable dt = sql.YanGetDb();
                     if (dt.Rows.Count != 1)
                     {
@@ -103,7 +104,7 @@ namespace FlowRecharge.Wechat
                     //    throw new WxPayException("下订单出错,订单金额错误！");
                     //}
 
-                    sql = "update tb_order set tb_order_TransID='" + transaction_id + "' where tb_order_ID='" + dt.YanDtValue2("tb_order_ID") + "'";
+                    sql = "update tb_order set tb_order_Status='待购票',tb_order_payStatus='支付成功',tb_order_TransID='" + transaction_id + "' where tb_order_ID='" + dt.YanDtValue2("tb_order_ID") + "'";
                     Log.WriteLog("更新微信订单号：" + sql);
                     sql.YanDbExe();
                     //更新订单
@@ -153,41 +154,35 @@ namespace FlowRecharge.Wechat
                 try
                 {
                     #region 调用购票接口,同时更新支付状态
-                    string sql = @" select * 
-                                    from tb_order as a left join  
-                                    where tb_order_BatchID='" + pbOrderID + "' and tb_order_TransID='" + transaction_id + "'";
-                    Log.WriteLog("根据预商户订单和微信订单获取订单：" + sql);
-                    DataTable dt = sql.YanGetDb();                    
-                    if (dt.Rows.Count != 1)
+                    List<tb_order> orderLt= tb_order.GetModelList("tb_order_BatchID='" + pbOrderID + "' and tb_order_TransID='" + transaction_id + "'");                 
+                    if (orderLt.Count != 1)
                     {
                         throw new Exception("商户订单号 {0} 未发现,或有多重订单！".Formatting(pbOrderID));
                     }
                     //锁票                  
                     //LockTicket lockTicket = new LockTicket(new SocketClient(), pbOrderID, dt.YanDtValue2("tb_order_cc"), 1, "", "", "");
                     //mySocketClient. LockTicket lockTicket = new LockTicket();
-                    string orderId = "";
                     isSubmitRecharge = true;
-                    sql = @"update  tb_order 
-                                set tb_order_BatchID='" + orderId + @"',
-                                    tb_order_Status='支付成功',
-                                    tb_order_payStatus='支付成功',
-                            where tb_order_ID='" + dt.YanDtValue2("tb_order_ID") + "'";
-                    Log.WriteLog("提交充值成功更新状态：" + sql);
-                    sql.YanDbExe();
+                    Log.WriteLog("准备更新状态");
+                    tb_order orderMd = orderLt[0];
+                    orderMd.tb_order_Status = "购票成功";
+                    orderMd.tb_order_payStatus = "支付成功";
+                    orderMd.Update();
+                    Log.WriteLog("购票成功更新状态：");
                     //throw new Exception("抛出错误测试提交充值成功的情况");
                     #endregion
                 }
                 catch (Exception ex)
                 {
                     #region 手机充值异常，做微信支付退款操作
-                    Log.WriteLog("支付回调-提交充值失败:" + ex.Messages());
+                    Log.WriteLog("支付回调-购票发生异常:" + ex.Messages());
                     if (isSubmitRecharge == false)
                     {
-                        //提交充值时发生了错误，需要退费
+                        //购票时发生了错误，需要退费
                         WxPayData result = Refund.Run(transaction_id, "", amount, amount);
                         Log.WriteLog("支付回调：退款返回结果！" + result.ToPrintStr());
                         Dictionary<string, string> dic = new Dictionary<string, string>();
-                        dic["tb_order_Status"] = "充值失败，已提交退款";
+                        dic["tb_order_Status"] = "购票失败";
                         dic["tb_order_refundStatus"] = result.GetValue("result_code").CStr().EqualsIgnoreCase("SUCCESS") ? "成功" : "失败";
                         dic["tb_order_refundid"] = result.GetValue("refund_id").CStr();
                         dic["tb_order_refundTime"] = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
@@ -198,7 +193,7 @@ namespace FlowRecharge.Wechat
                     if (isSubmitRecharge)
                     {
                         //表示已经成功提交了充值申请，这时不能退费了
-                        string sql = "update tb_order set tb_order_Status='提交充值成功' where tb_order_pbOrderID='" + pbOrderID + "' and tb_order_TransID='" + transaction_id + "'";
+                        string sql = "update tb_order set tb_order_Status='购票成功' where tb_order_pbOrderID='" + pbOrderID + "' and tb_order_TransID='" + transaction_id + "'";
                         Log.WriteLog("支付成功，提交充值成功，后续发生错误：" + sql);
                         sql.YanDbExe();
                     }
@@ -218,8 +213,8 @@ namespace FlowRecharge.Wechat
                 Log.WriteLog("支付回调：订单查询失败 : " + res.ToXml());
 
                 //支付失败也要记录
-                string sql = "update tb_order set tb_order_Status='支付失败' where tb_order_pbOrderID='" + pbOrderID + "' and tb_order_TransID='" + transaction_id + "'";
-                Log.WriteLog("更新提交充值失败：" + sql);
+                string sql = "update tb_order set tb_order_Status='购票失败' where tb_order_BatchID='" + pbOrderID + "' and tb_order_TransID='" + transaction_id + "'";
+                Log.WriteLog("购票失败失败：" + sql);
                 sql.YanDbExe();
 
                 page.Response.Write(res.ToXml());

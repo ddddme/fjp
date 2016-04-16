@@ -66,6 +66,59 @@ function getRootPath() {
     var postPath = strPath.substring(0, strPath.substr(1).indexOf('/') + 1);
     return (prePath + postPath);
 }
+//| 求两个时间的天数差 日期格式为 YYYY-MM-dd 
+function daysBetween(DateOne, DateTwo) {
+    /// <summary>比较日期差 dtEnd 格式为日期型或者 有效日期格式字符串 </summary>
+    /// <param name="DateOne" type="char">第一个日期</param>
+    /// <param name="DateTwo" type="number">第二个日期</param>
+    var OneMonth = DateOne.substring(5, DateOne.lastIndexOf('-'));
+    var OneDay = DateOne.substring(DateOne.length, DateOne.lastIndexOf('-') + 1);
+    var OneYear = DateOne.substring(0, DateOne.indexOf('-'));
+
+    var TwoMonth = DateTwo.substring(5, DateTwo.lastIndexOf('-'));
+    var TwoDay = DateTwo.substring(DateTwo.length, DateTwo.lastIndexOf('-') + 1);
+    var TwoYear = DateTwo.substring(0, DateTwo.indexOf('-'));
+
+    var cha = ((Date.parse(OneMonth + '/' + OneDay + '/' + OneYear) - Date.parse(TwoMonth + '/' + TwoDay + '/' + TwoYear)) / 86400000);
+    return Math.abs(cha);
+}
+//| 日期计算 
+Date.prototype.DateAdd = function (strInterval, Number) {
+    /// <summary>比较日期差 dtEnd 格式为日期型或者 有效日期格式字符串 </summary>
+    /// <param name="strInterval" type="char">日期格式</param>
+    /// <param name="Number" type="number">增加的数字</param>
+    var dtTmp = this;
+    switch (strInterval) {
+        case 's': return new Date(Date.parse(dtTmp) + (1000 * Number));
+        case 'n': return new Date(Date.parse(dtTmp) + (60000 * Number));
+        case 'h': return new Date(Date.parse(dtTmp) + (3600000 * Number));
+        case 'd': return new Date(Date.parse(dtTmp) + (86400000 * Number));
+        case 'w': return new Date(Date.parse(dtTmp) + ((86400000 * 7) * Number));
+        case 'q': return new Date(dtTmp.getFullYear(), (dtTmp.getMonth()) + Number * 3, dtTmp.getDate(), dtTmp.getHours(), dtTmp.getMinutes(), dtTmp.getSeconds());
+        case 'm': return new Date(dtTmp.getFullYear(), (dtTmp.getMonth()) + Number, dtTmp.getDate(), dtTmp.getHours(), dtTmp.getMinutes(), dtTmp.getSeconds());
+        case 'y': return new Date((dtTmp.getFullYear() + Number), dtTmp.getMonth(), dtTmp.getDate(), dtTmp.getHours(), dtTmp.getMinutes(), dtTmp.getSeconds());
+    }
+}
+//| 比较日期差
+Date.prototype.DateDiff = function (strInterval, dtEnd) {
+    /// <summary>比较日期差 dtEnd 格式为日期型或者 有效日期格式字符串 </summary>
+    /// <param name="strInterval" type="char">日期格式</param>
+    /// <param name="dtEnd" type="string">格式为日期型或者 有效日期格式字符串</param>
+    var dtStart = this;
+    if (typeof dtEnd == 'string')//如果是字符串转换为日期型 
+    {
+        dtEnd = StringToDate(dtEnd);
+    }
+    switch (strInterval) {
+        case 's': return parseInt((dtEnd - dtStart) / 1000);
+        case 'n': return parseInt((dtEnd - dtStart) / 60000);
+        case 'h': return parseInt((dtEnd - dtStart) / 3600000);
+        case 'd': return parseInt((dtEnd - dtStart) / 86400000);
+        case 'w': return parseInt((dtEnd - dtStart) / (86400000 * 7));
+        case 'm': return (dtEnd.getMonth() + 1) + ((dtEnd.getFullYear() - dtStart.getFullYear()) * 12) - (dtStart.getMonth() + 1);
+        case 'y': return dtEnd.getFullYear() - dtStart.getFullYear();
+    }
+}
 //时间格式转换
 Date.prototype.toCommonCase = function (pType) {
     /// <summary>返回YYYY-MM-DD HHMSSS格式的日期</summary>
@@ -217,6 +270,15 @@ String.prototype.PadHelper = function (totalWidth, paddingChar, isRightPadded) {
         }
     } else {
         return this;
+    }
+}
+//表单赋值
+function setFormValue(pForm, pJson) {
+    //初始化表单
+    for (var key in pJson) {
+        var tControl = pForm.find("[id=" + key + "]");
+        if (tControl != undefined)
+            tControl.val(eval("pJson." + key));
     }
 }
 

@@ -33,7 +33,7 @@ namespace FlowRecharge.Wechat
             WxPayData data = new WxPayData();
             data.SetValue("body", dic["body"]);
             data.SetValue("attach", dic["attach"]);
-            data.SetValue("out_trade_no", dic["pbOrderID"]);
+            data.SetValue("out_trade_no", dic["out_trade_no"]);
             data.SetValue("total_fee", dic["total_fee"]);
             data.SetValue("time_start", DateTime.Now.ToString("yyyyMMddHHmmss"));
             data.SetValue("time_expire", DateTime.Now.AddMinutes(10).ToString("yyyyMMddHHmmss"));
@@ -128,7 +128,9 @@ namespace FlowRecharge.Wechat
             获取票列表,
             获取订单列表,
             获取微信JS配置签名,
-            统一下单
+            统一下单,
+            获取用户信息,
+            保存用户信息
         }
     }
 }

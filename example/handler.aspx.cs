@@ -21,6 +21,9 @@ public partial class example_handler : System.Web.UI.Page
                 case mo_myKz.en_clFun.获取票列表:
                     GetTickList();
                     break;
+                case mo_myKz.en_clFun.获取用户信息:
+                    GetUserinfo();
+                    break;
                 case mo_myKz.en_clFun.获取订单列表:
                     Response.Write("[]");
                     break;
@@ -30,9 +33,15 @@ public partial class example_handler : System.Web.UI.Page
                 case mo_myKz.en_clFun.统一下单:
                     getPayParam();
                     break;
+                case mo_myKz.en_clFun.保存用户信息:
+                    saveUser();
+                    break;
+
             }
         }
-        catch { }
+        catch {
+            Response.Write(new { success = false, msg="系统错误！" }.ToJSONString());
+        }
         finally
         {
             Response.End();
@@ -51,7 +60,7 @@ public partial class example_handler : System.Web.UI.Page
                 Response.Write(new { success = false, msg = "查询站点失败" }.ToJSONString());
                 return;
             }
-            Response.Write(new { success = true,value= stations.ToJSONString() }.ToJSONString());
+            Response.Write(new { success = true, value = stations.ToJSONString() }.ToJSONString());
         }
         catch (Exception ex)
         {
@@ -76,7 +85,12 @@ public partial class example_handler : System.Web.UI.Page
                 Response.Write(new { success = false, msg = "查询失败" }.ToJSONString());
                 return;
             }
-            Response.Write(new { success = true, BatchID=tGuid,value = cheCis.ToJSONString() }.ToJSONString());
+            if (cheCis.Count==0)
+            {
+                Response.Write(new { success = false, msg = "目前没有到该地区的车票！" }.ToJSONString());
+                return;
+            }
+            Response.Write(new { success = true, BatchID = tGuid, value = cheCis.ToJSONString() }.ToJSONString());
         }
         catch (Exception ex)
         {
@@ -99,7 +113,6 @@ public partial class example_handler : System.Web.UI.Page
         Response.Write(jsApiParam.ToJson());
         return;
     }
-
     /// <summary>
     /// 统一下单
     /// </summary>
@@ -110,11 +123,11 @@ public partial class example_handler : System.Web.UI.Page
         try
         {
             dic["openid"] = Request["openid"];   //微信客户标识
-            dic["total_fee"] = (Convert.ToDecimal(Request["Amount"]) * 100).ToString("0");     //订单金额
-            dic["pbOrderID"] = WxPayApi.GenerateOutTradeNo();   //预支付订单号
-            dic["body"] ="武汉-" +Request["Destination"]+" "+ Request["Checi"]+" "+Cl_StrMag.YanForDa_1(Request["FcDate"]) + " " + Request["FcTime"];    //商品描述
+            dic["total_fee"] = (Convert.ToDecimal(Request["Amount"]) * 100).ToString("0");     //订单金额            
+            dic["body"] = "武汉-" + Request["Destination"] + " " + Request["Checi"] + " " + Cl_StrMag.YanForDa_1(Request["FcDate"]) + " " + Request["FcTime"];    //商品描述
             dic["attach"] = "";    //商品大小
             dic["out_trade_no"] = Request["BatchID"];    //商户订单号
+            //dic["pbOrderID"] = WxPayApi.GenerateOutTradeNo();   //预支付订单号
             orderResult = pubdim.makeOrder(dic);
         }
         catch (WxPayException ex)
@@ -147,8 +160,8 @@ public partial class example_handler : System.Web.UI.Page
             order.tb_order_Status = "未支付";  //因为进入页面就会调用统一下单函数，所以每次进入这个页面都会有个订单，给客户列出订单的时候，这部分应该不显示，应该显示后面以后状态的订单
             order.tb_order_cc = Request["Checi"];
             order.tb_order_ddz = Request["Destination"];
-            order.tb_order_fcsj =Convert.ToDateTime(Cl_StrMag.YanForDa_2(Request["FcDate"] + " " + Request["FcTime"] + ":00"));
-            order.tb_order_pj =Convert.ToDecimal(Request["Price"]);
+            order.tb_order_fcsj = Convert.ToDateTime(Cl_StrMag.YanForDa_2(Request["FcDate"] + " " + Request["FcTime"] + ":00"));
+            order.tb_order_pj = Convert.ToDecimal(Request["Price"]);
             order.add();
         }
         catch (Exception ex)
@@ -161,7 +174,7 @@ public partial class example_handler : System.Web.UI.Page
         {
             var result = pubdim.GetJsApiParameters(orderResult);
             Log.WriteLog("下预支付订单正常：" + new { success = true, value = result.ToJson() }.ToJSONString());
-            Response.Write(new { success = true, value = result.ToJson()}.ToJSONString());
+            Response.Write(new { success = true, value = result.ToJson() }.ToJSONString());
             return;
         }
         catch (Exception ex)
@@ -169,5 +182,53 @@ public partial class example_handler : System.Web.UI.Page
             Log.WriteLog("获取支付参数错误：" + ex.Messages());
             Response.Write(new { success = false, msg = "微信支付发生异常，请返回重试！" }.ToJSONString());
         }
+    }
+    /// <summary>
+    /// 获取用户信息
+    /// </summary>
+    private void GetUserinfo()
+    {
+        List<d_fjp.tb_user> userinfo = d_fjp.tb_user.GetModelList("tb_user_wxbs='" + Request["wxbs"]+"'");
+        if (userinfo.Count == 0)
+            Response.Write(new { success = false, msg = "没有该用户信息！" }.ToJSONString());
+        else
+            Response.Write(new { success = true, value = userinfo[0].ToJSONString() }.ToJSONString());
+    }
+    private void saveUser()
+    {
+        int rvid = 0;    
+        if (string.IsNullOrEmpty(Request["tb_user_ID"]))
+        {
+            //添加
+            if (d_fjp.tb_user.GetModelList("tb_user_sfz='"+ Request["tb_user_sfz"].Trim()+ "'").Count>0)
+            {
+                Response.Write(new { success = false, msg = "该身份证信息已被注册！" }.ToJSONString());
+                return;
+            }
+            if (d_fjp.tb_user.GetModelList("tb_user_phone='" + Request["tb_user_phone"].Trim() + "'").Count > 0)
+            {
+                Response.Write(new { success = false, msg = "该手机号码已被注册！" }.ToJSONString());
+                return;
+            }
+            rvid= Cl_DataMag.saveRequestData("tb_user");
+        }
+        else
+        {
+            //修改
+            if (d_fjp.tb_user.GetModelList("tb_user_sfz='" + Request["tb_user_sfz"].Trim() + "' and tb_user_ID<>" + Request["tb_user_ID"].Trim()).Count > 0)
+            {
+                Response.Write(new { success = false, msg = "该身份证信息已被注册！" }.ToJSONString());
+                return;
+            }
+
+            if (d_fjp.tb_user.GetModelList("tb_user_phone='" + Request["tb_user_phone"].Trim() + "' and tb_user_ID<>" + Request["tb_user_ID"].Trim()).Count > 0)
+            {
+                Response.Write(new { success = false, msg = "该手机号码已被注册！" }.ToJSONString());
+                return;
+            }
+            Cl_DataMag.modRequestData("tb_user", Request["tb_user_ID"].Trim());
+            rvid = Request["tb_user_ID"].Trim().ToString().CInt();
+        }
+        Response.Write(new { success = true, value = d_fjp.tb_user.getNewModel(rvid).ToJSONString() }.ToJSONString());
     }
 }
